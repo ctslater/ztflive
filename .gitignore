@@ -1,0 +1,7 @@
+elm-stuff
+.ipynb_checkpoints
+sample_alerts
+ztf*tar.gz
+static/index.html
+__pycache__
+.vscode

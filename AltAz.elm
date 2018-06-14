@@ -5,21 +5,21 @@ import Html exposing (Html)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 
-import Coordinates exposing (RaDec, AltAz)
+import Coordinates exposing (RaDec, AltAz, skyToAltAz)
 
 type alias PolarSpec = {width: Float, height: Float,
                         cx: Float, cy: Float }
 
 type alias PolarMapping = Float -> Float -> (Float, Float)
 
-altAzPlot: List(RaDec) -> Float -> PolarMapping -> Html msg
+altAzPlot: List(RaDec a) -> Float -> PolarMapping -> Html msg
 altAzPlot fields lst mapping =
   svg [ viewBox "0 0 100 100", width "500px" ] [
      polarGrid mapping,
      rectsFromModel fields lst mapping
   ]
 
-rectsFromModel: List(RaDec) -> Float -> PolarMapping -> Svg msg
+rectsFromModel: List(RaDec a) -> Float -> PolarMapping -> Svg msg
 rectsFromModel fields lst mapping =
   svg [] (List.map (\radec -> fieldRect (skyToAltAz radec lst) mapping) fields)
 
@@ -30,23 +30,6 @@ fieldRect coord mapping =
   in
     rect [x (toString plot_x), y (toString plot_y),
           width "5", height "5", fill "orange" ] []
-
--- LST in radians
--- Obviously obs_lat should not be here
-skyToAltAz: RaDec -> Float -> AltAz
-skyToAltAz coord lst =
-  let
-    obs_lat = degrees 32.0
-    hour_angle = lst - (degrees 3.0)
-    -- sin(ALT) = sin(DEC)*sin(LAT)+cos(DEC)*cos(LAT)*cos(HA)
-    sin_alt = ((sin (degrees coord.dec)) * (sin obs_lat) +
-      (cos (degrees coord.dec)) * (cos obs_lat) * (cos hour_angle))
-    alt = asin sin_alt
-    cos_a = (sin (degrees coord.dec) - (sin alt)*(sin obs_lat))/((cos alt)*(cos obs_lat))
-    az = if sin hour_angle < 0 then acos cos_a else 2*pi - (acos cos_a)
-  in
-    AltAz alt az
-
 
 -- Theta is the azimuth in radians, clockwise from zero at the top
 -- Phi is the polar angle, pi/2 at the outer gridline.
