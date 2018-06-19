@@ -20,8 +20,8 @@ def process_alert(alert, redis_conn, expire=False, date=False):
     # This could be cleaned when they , but easier
     # now to expire them
     if expire:
-        reids_conn.expire(visit + "_alertcount", 3600)
-        reids_conn.expire(visit + "_field", 3600)
+        redis_conn.expire(visit + "_alertcount", 3600)
+        redis_conn.expire(visit + "_field", 3600)
 
     if date:
         t = datetime.now()

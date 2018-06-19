@@ -1,12 +1,14 @@
 
 from __future__ import print_function
 
+import os
 from flask import Flask, json
 import redis
 import astropy.io
 import astropy.io.ascii
 
-redis_conn = redis.StrictRedis("127.0.0.1")
+redis_server = os.getenv("REDIS_HOST") or "127.0.0.1"
+redis_conn = redis.StrictRedis(redis_server)
 
 app = Flask(__name__)
 
@@ -42,6 +44,6 @@ def visits():
     return json.dumps(combined_visits)
 
 
-@app.route('/index.html')
+@app.route('/')
 def static_file():
-    return app.send_static_file('./index.html')
+    return app.send_static_file('index.html')

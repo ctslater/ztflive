@@ -16,13 +16,13 @@ COPY static/elm.js static/
 FROM python:3.6-slim
 LABEL maintainer "ctslater@uw.edu"
 WORKDIR /opt
-COPY . .
-
 
 # gcc is required to compile uwsgi
 # Need /etc/mime.types for serving static files from uwsgi
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y gcc mime-support
+
+COPY . .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
