@@ -32,4 +32,4 @@ RUN chown -R uwsgi:uwsgi_grp /opt
 USER uwsgi
 
 EXPOSE 8000
-CMD uwsgi uwsgi.ini
+CMD uwsgi --env REDIS_HOST=$REDIS_HOST uwsgi.ini

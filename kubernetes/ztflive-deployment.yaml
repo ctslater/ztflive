@@ -1,0 +1,31 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: ztflive
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: ztflive
+        tier: frontend
+    spec:
+      containers:
+      - name: ztflive
+        image: docker.io/ctslater/ztflive:v0.1.3
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        env:
+        - name: GET_HOSTS_FROM
+          value: dns
+        - name: REDIS_HOST
+          value: redis-master
+          # If your cluster config does not include a dns service, then to
+          # instead access environment variables to find service host
+          # info, comment out the 'value: dns' line above, and uncomment the
+          # line below:
+          # value: env
+        ports:
+        - containerPort: 8000
