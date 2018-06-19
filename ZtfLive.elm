@@ -3,6 +3,7 @@ import Html exposing (Html, text)
 import Html.Attributes as HtmlAttr
 import Html.Events exposing (onClick)
 import List
+import Dict
 import Http
 import Json.Decode
 import Time exposing (Time)
@@ -23,12 +24,12 @@ main =
 init: (Model, Cmd Msg)
 init =
   (
-  Model 0.50 [],
+  Model 0.50 Dict.empty,
   sendGetFieldReq)
 
 -- MODEL
 
-type alias Model = { lst:  Float, fields: List(Field) }
+type alias Model = { lst:  Float, fields: Dict.Dict String Field }
 
 type alias Field = { ra: Float, dec: Float, alerts: String, visit: String}
 
@@ -49,8 +50,17 @@ update msg model =
     DecLST -> ({ model | lst = model.lst - ((2 * pi)/24) }, Cmd.none)
     Tick _ -> (model, sendGetFieldReq)
     GetFields -> (model, sendGetFieldReq)
-    VisitsUpdate (Ok fields) -> ({ model | fields = fields}, Cmd.none)
+    VisitsUpdate (Ok newFields) -> ({ model | fields = addUpdatedFields model.fields newFields }, Cmd.none)
     VisitsUpdate (Err _) -> (model, Cmd.none)
+
+
+addUpdatedFields: Dict.Dict String Field -> List (Field) -> Dict.Dict String Field
+addUpdatedFields originalFields newFields = 
+  let
+    fieldsWithVisitIDs = List.map ( \a -> (a.visit, a) ) newFields
+    newFieldDictionary = Dict.fromList fieldsWithVisitIDs
+  in
+    Dict.union newFieldDictionary originalFields
 
 fieldDecoder: Json.Decode.Decoder Field
 fieldDecoder = Json.Decode.map4 Field (Json.Decode.field "RA" Json.Decode.float)
@@ -77,7 +87,7 @@ view model =
     Html.div [ HtmlAttr.style [ ("backgroundColor", "black"),
                                 ("color", "white"),
                                 ("height", "100vh"), ("padding", "1em") ] ] [
-      altAzPlot model.fields model.lst mapping,
+      altAzPlot (Dict.values model.fields) model.lst mapping,
       lstControls model,
       -- Html.button [ onClick GetFields ] [ text "Get Fields" ],
       alertsTable model
@@ -105,7 +115,7 @@ alertsTable model =
         Html.th [] [text "Dec"],
         Html.th [] [text "# of Alerts"]
       ]
-    ] ++ List.map alertsTableRow model.fields
+    ] ++ List.map alertsTableRow (Dict.values model.fields)
     )
   ]
 
