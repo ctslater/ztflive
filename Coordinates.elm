@@ -12,7 +12,7 @@ skyToAltAz: RaDec a -> Float -> AltAz
 skyToAltAz coord lst =
   let
     obs_lat = degrees 32.0
-    hour_angle = lst - (degrees 3.0)
+    hour_angle = lst - (degrees coord.ra)
     sin_alt = ((sin (degrees coord.dec)) * (sin obs_lat) +
       (cos (degrees coord.dec)) * (cos obs_lat) * (cos hour_angle))
     alt = asin sin_alt

@@ -86,10 +86,10 @@ view model =
   in
     Html.div [ HtmlAttr.style [ ("backgroundColor", "black"),
                                 ("color", "white"),
-                                ("height", "100vh"), ("padding", "1em") ] ] [
+                                ("height", "100%"), ("padding", "1em") ] ] [
       altAzPlot (Dict.values model.fields) model.lst mapping,
       lstControls model,
-      -- Html.button [ onClick GetFields ] [ text "Get Fields" ],
+      Html.button [ onClick GetFields ] [ text "Get Updates" ],
       alertsTable model
     ]
 
@@ -115,7 +115,7 @@ alertsTable model =
         Html.th [] [text "Dec"],
         Html.th [] [text "# of Alerts"]
       ]
-    ] ++ List.map alertsTableRow (Dict.values model.fields)
+    ] ++ List.map alertsTableRow (List.reverse (Dict.values model.fields))
     )
   ]
 
