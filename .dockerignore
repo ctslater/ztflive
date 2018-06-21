@@ -2,3 +2,5 @@
 **/*.pyc
 **/__pycache__
 elm-stuff
+kubernetes
+tests
