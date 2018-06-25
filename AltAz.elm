@@ -12,16 +12,16 @@ type alias PolarSpec = {width: Float, height: Float,
 
 type alias PolarMapping = Float -> Float -> (Float, Float)
 
-altAzPlot: List(RaDec a) -> Float -> PolarMapping -> Html msg
-altAzPlot fields lst mapping =
+altAzPlot: List(RaDec a) -> Float -> Float -> PolarMapping -> Html msg
+altAzPlot fields latitude lst mapping =
   svg [ viewBox "0 0 100 100", width "500px" ] [
      polarGrid mapping,
-     rectsFromModel fields lst mapping
+     rectsFromModel fields latitude lst mapping
   ]
 
-rectsFromModel: List(RaDec a) -> Float -> PolarMapping -> Svg msg
-rectsFromModel fields lst mapping =
-  svg [] (List.map (\radec -> fieldRect (skyToAltAz radec lst) mapping) fields)
+rectsFromModel: List(RaDec a) -> Float -> Float -> PolarMapping -> Svg msg
+rectsFromModel fields latitude lst mapping =
+  svg [] (List.map (\radec -> fieldRect (skyToAltAz radec latitude lst) mapping) fields)
 
 fieldRect: AltAz -> PolarMapping -> Svg msg
 fieldRect coord mapping =

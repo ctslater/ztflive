@@ -24,12 +24,12 @@ main =
 init: (Model, Cmd Msg)
 init =
   (
-  Model 0.50 Dict.empty,
+  Model 0.50 (degrees 33.356) Dict.empty,
   sendGetFieldReq)
 
 -- MODEL
 
-type alias Model = { lst:  Float, fields: Dict.Dict String Field }
+type alias Model = { lst:  Float, obs_latitude: Float, fields: Dict.Dict String Field }
 
 type alias Field = { ra: Float, dec: Float, alerts: String, visit: String}
 
@@ -87,10 +87,14 @@ view model =
     Html.div [ HtmlAttr.style [ ("backgroundColor", "black"),
                                 ("color", "white"),
                                 ("height", "100%"), ("padding", "1em") ] ] [
-      altAzPlot (Dict.values model.fields) model.lst mapping,
-      lstControls model,
-      Html.button [ onClick GetFields ] [ text "Get Updates" ],
-      alertsTable model
+      Html.div [ HtmlAttr.style [ ("float", "left")] ] [
+        altAzPlot (Dict.values model.fields) model.obs_latitude model.lst mapping,
+        lstControls model,
+        Html.button [ onClick GetFields ] [ text "Get Updates" ]
+      ],
+      Html.div [ HtmlAttr.style [ ("float", "left")] ] [
+        alertsTable model
+      ]
     ]
 
 alertsTableRow: Field -> Html msg
