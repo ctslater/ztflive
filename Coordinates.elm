@@ -13,7 +13,6 @@ type alias AltAz = { alt: Float, az: Float}
 -- Lat is radians
 -- LST in radians
 -- AltAz is in radians
--- Obviously obs_lat should not be here
 skyToAltAz: RaDec a -> Float -> Float -> AltAz
 skyToAltAz coord obs_lat lst =
   let
@@ -38,13 +37,14 @@ daysJD time =
     -- Unix epoch = JD 2440587.5
   in days_since_unix_epoch + 2440587.5
 
+-- longitude is in radians
 jdToLST: Time -> Float -> Float
 jdToLST jd longitude = 
   let
     time_u = jd - 2451545.0
     era = 2 * pi * (0.7790572732640 + 1.00273781191135448 * time_u)
   in
-    mod2Pi (era + (degrees longitude))
+    mod2Pi (era + longitude)
 
 -- \theta (t_{U})=2\pi (0.7790572732640+1.00273781191135448t_{U})
 utcToLST: Time -> Float -> Float

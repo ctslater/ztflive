@@ -16,6 +16,8 @@ def process_alert(alert, redis_conn, expire=False, date=False):
 
     ret = redis_conn.incr(visit + "_alertcount")
     redis_conn.setnx(visit + "_field", field)
+    redis_conn.setnx(visit + "_filter", candidate['fid'])
+    redis_conn.setnx(visit + "_programid", candidate['programid'])
 
     # This could be cleaned when they , but easier
     # now to expire them

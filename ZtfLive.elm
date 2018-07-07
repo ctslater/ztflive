@@ -7,8 +7,10 @@ import Dict
 import Http
 import Json.Decode
 import Time exposing (Time)
+import Task
 
 import AltAz exposing (altAzPlot, PolarSpec, makePolarMapping)
+import Coordinates exposing (utcToLST, daysJD)
 
 main =
   Html.program
@@ -24,12 +26,13 @@ main =
 init: (Model, Cmd Msg)
 init =
   (
-  Model 0.50 (degrees 33.356) Dict.empty,
-  sendGetFieldReq)
+  Model 0.0 (degrees 33.356) (degrees -116.863) Dict.empty,
+  initialize)
 
 -- MODEL
 
-type alias Model = { lst:  Float, obs_latitude: Float, fields: Dict.Dict String Field }
+type alias Model = { lst:  Float, obs_latitude: Float, obs_longitude: Float,
+                     fields: Dict.Dict String Field }
 
 type alias Field = { ra: Float, dec: Float, alerts: String, visit: String}
 
@@ -39,16 +42,16 @@ subscriptions model =
 
 -- UPDATE
 
-type Msg = Reset | IncLST | DecLST | Tick Time
+type Msg = Nothing | IncLST | DecLST | Tick Time
           | GetFields | VisitsUpdate (Result Http.Error (List Field))
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    Reset -> (model, Cmd.none)
+    Nothing -> (model, Cmd.none)
     IncLST -> ({ model | lst = model.lst + ((2 * pi)/24) }, Cmd.none)
     DecLST -> ({ model | lst = model.lst - ((2 * pi)/24) }, Cmd.none)
-    Tick _ -> (model, sendGetFieldReq)
+    Tick time -> ({model | lst = utcToLST time model.obs_longitude} , sendGetFieldReq)
     GetFields -> (model, sendGetFieldReq)
     VisitsUpdate (Ok newFields) -> ({ model | fields = addUpdatedFields model.fields newFields }, Cmd.none)
     VisitsUpdate (Err _) -> (model, Cmd.none)
@@ -67,6 +70,9 @@ fieldDecoder = Json.Decode.map4 Field (Json.Decode.field "RA" Json.Decode.float)
                                       (Json.Decode.field "Dec" Json.Decode.float)
                                       (Json.Decode.field "alertcount" Json.Decode.string)
                                       (Json.Decode.field "visit" Json.Decode.string)
+
+initialize : Cmd Msg
+initialize = Task.perform Tick Time.now
 
 sendGetFieldReq: Cmd Msg
 sendGetFieldReq =
@@ -136,5 +142,6 @@ formatLST: Float -> String
 formatLST lst =
   let
     hours = floor (24 * lst/(2 * pi))
+    minutes =  floor (60 * (24 * lst/(2*pi) - toFloat(hours)))
   in
-    toString hours ++ ":00"
+    toString hours ++ ":" ++ toString minutes
